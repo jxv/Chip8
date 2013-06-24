@@ -81,7 +81,7 @@ void exec(struct chip8 *c, SDL_Surface * s)
 		}
 		ks = SDL_GetKeyState(NULL);
 		keys(c, ks);
-		timestep(c);
+		timeStep(c);
 		step(c);
 		draw(c, s);
 		SDL_Delay(20);	/* aprx. 60Hz */

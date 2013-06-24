@@ -20,7 +20,7 @@ struct chip8 {
 };
 
 void ldSysData(struct chip8 *);
-void timestep(struct chip8 *);
+void timeStep(struct chip8 *);
 void step(struct chip8 *);
 
 #endif
