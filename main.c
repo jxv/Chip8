@@ -121,8 +121,7 @@ void draw(struct chip8 *c, SDL_Surface * s)
 	cl = c->st ? st : fg;
 	for (y = 0; y < 32; y++) {
 		for (x = 0; x < 64; x++) {
-			p = (Uint8 *) s->pixels + x * s->format->BytesPerPixel +
-			    y * s->pitch;
+			p = (Uint8 *) s->pixels + x * s->format->BytesPerPixel + y * s->pitch;
 			q = c->disp[y * 64 + x];
 			*p = q ? cl : bg;
 		}
