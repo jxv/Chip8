@@ -200,35 +200,16 @@ void opcode7XNN(struct chip8 *c, u16 op)
 void opcode8XY_(struct chip8 *c, u16 op)
 {
 	switch (K(op)) {
-	case 0x0:
-		c->v[X(op)] = c->v[Y(op)];
-		break;
-	case 0x1:
-		c->v[X(op)] |= c->v[Y(op)];
-		break;
-	case 0x2:
-		c->v[X(op)] &= c->v[Y(op)];
-		break;
-	case 0x3:
-		c->v[X(op)] ^= c->v[Y(op)];
-		break;
-	case 0x4:
-		opcode8XY4(c, op);
-		break;
-	case 0x5:
-		opcode8XY5(c, op);
-		break;
-	case 0x6:
-		opcode8XY6(c, op);
-		break;
-	case 0x7:
-		opcode8XY7(c, op);
-		break;
-	case 0xe:
-		opcode8XYE(c, op);
-		break;
-	default:
-		break;
+	case 0x0: c->v[X(op)] = c->v[Y(op)]; break;
+	case 0x1: c->v[X(op)] |= c->v[Y(op)]; break;
+	case 0x2: c->v[X(op)] &= c->v[Y(op)]; break;
+	case 0x3: c->v[X(op)] ^= c->v[Y(op)]; break;
+	case 0x4: opcode8XY4(c, op); break;
+	case 0x5: opcode8XY5(c, op); break;
+	case 0x6: opcode8XY6(c, op); break;
+	case 0x7: opcode8XY7(c, op); break;
+	case 0xe: opcode8XYE(c, op); break;
+	default: break;
 	}
 }
 
@@ -324,14 +305,9 @@ void opcodeDXYN(struct chip8 *c, u16 op)
 void opcodeEX__(struct chip8 *c, u16 op)
 {
 	switch (KK(op)) {
-	case 0x9e:
-		opcodeEX9E(c, op);
-		break;
-	case 0xa1:
-		opcodeEXA1(c, op);
-		break;
-	default:
-		break;
+	case 0x9e: opcodeEX9E(c, op); break;
+	case 0xa1: opcodeEXA1(c, op); break;
+	default: break;
 	}
 }
 
@@ -352,35 +328,16 @@ void opcodeEXA1(struct chip8 *c, u16 op)
 void opcodeFX__(struct chip8 *c, u16 op)
 {
 	switch (KK(op)) {
-	case 0x07:
-		c->v[X(op)] = c->dt;
-		break;
-	case 0x0a:
-		opcodeFX0A(c, op);
-		break;
-	case 0x15:
-		c->dt = c->v[X(op)];
-		break;
-	case 0x18:
-		c->st = c->v[X(op)];
-		break;
-	case 0x1e:
-		opcodeFX1E(c, op);
-		break;
-	case 0x29:
-		opcodeFX29(c, op);
-		break;
-	case 0x33:
-		opcodeFX33(c, op);
-		break;
-	case 0x55:
-		opcodeFX55(c, op);
-		break;
-	case 0x65:
-		opcodeFX65(c, op);
-		break;
-	default:
-		break;
+	case 0x07: c->v[X(op)] = c->dt;	break;
+	case 0x0a: opcodeFX0A(c, op); break;
+	case 0x15: c->dt = c->v[X(op)]; break;
+	case 0x18: c->st = c->v[X(op)];	break;
+	case 0x1e: opcodeFX1E(c, op); break;
+	case 0x29: opcodeFX29(c, op); break;
+	case 0x33: opcodeFX33(c, op); break;
+	case 0x55: opcodeFX55(c, op); break;
+	case 0x65: opcodeFX65(c, op); break;
+	default: break;
 	}
 }
 
@@ -589,3 +546,4 @@ void ldSysFnt(struct chip8 *c)
 	ldFntE(c->mem + 70);
 	ldFntF(c->mem + 75);
 }
+
