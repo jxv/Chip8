@@ -64,7 +64,7 @@ void mkWindow(SDL_Surface ** s)
 {
 	SDL_Init(SDL_INIT_VIDEO);
 	*s = SDL_SetVideoMode(64, 32, 8, SDL_SWSURFACE);
-	SDL_WM_SetCaption("EmuChip8", "EmuChip8");
+	SDL_WM_SetCaption("Chip8Emulator", "Chip8Emulator");
 }
 
 void exec(struct chip8 *c, SDL_Surface * s)
