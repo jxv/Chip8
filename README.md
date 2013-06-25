@@ -12,6 +12,6 @@ Input:
 	j k l ;
 	m , . /
 
-* The design is based off Cowgod's [documentation](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM]).
+* The design is based off Cowgod's [documentation](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM).
 * The pixels flash red instead of beeping.
 
