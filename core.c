@@ -445,19 +445,12 @@ void ldSysFnt(struct Chip8 *c)
 
 void ldSysData(struct Chip8 *c)
 {
-	int i;
+	memset(c->v, 0, sizeof(0[c->v]) * 0x10);
+	memset(c->key, 0, sizeof(0[c->key]) * 0x10);
+	memset(c->stk, 0, sizeof(0[c->stk]) * 0x10);
+	memset(c->mem, 0, sizeof(0[c->mem]) * 0x1000);
+	memset(c->disp, 0, sizeof(0[c->disp]) * 32 * 64);
 
-	for (i = 0; i < 0x10; i++) {
-		c->v[i] = 0x0;
-		c->key[i] = 0x0;
-		c->stk[i] = 0x0;
-	}
-	for (i = 0; i < 0x1000; i++) {
-		c->mem[i] = 0x0;
-	}
-	for (i = 0; i < 32 * 64; i++) {
-		c->disp[i] = 0x0;
-	}
 	ldSysFnt(c);
 	c->sp = 0;
 	c->pc = 0x200;
