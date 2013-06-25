@@ -2,9 +2,11 @@ Chip8Emulator
 =============
 
 Usage:
+
 	./Chip8Emulator PATH_TO_ROM
 
 Input:
+
 	7 8 9 0
 	u i o \[
 	j k l ;
