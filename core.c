@@ -26,12 +26,7 @@ void timeStep(struct Chip8 *c)
 
 void opcode00E0(struct Chip8 *c, u16 op)
 {
-	int x, y;
-	for (y = 0; y < 32; y++) {
-		for (x = 0; x < 64; x++) {
-			c->disp[y * 64 + x] = 0;
-		}
-	}
+	memset(c->disp, 0, sizeof(0[c->disp]) * 32 * 64);
 }
 
 void opcode00EE(struct Chip8 *c, u16 op)
