@@ -14,69 +14,6 @@
 #define	NNN(op) (op & 0xfff)
 #define	KKK(op) (op & 0xfff)
 
-typedef void (*opcodeFtpr) (struct Chip8 *, u16);
-
-void opcode0___(struct Chip8 *, u16);
-void opcode1NNN(struct Chip8 *, u16);
-void opcode2NNN(struct Chip8 *, u16);
-void opcode3XNN(struct Chip8 *, u16);
-void opcode4XNN(struct Chip8 *, u16);
-void opcode5XY0(struct Chip8 *, u16);
-void opcode6XNN(struct Chip8 *, u16);
-void opcode7XNN(struct Chip8 *, u16);
-void opcode8XY_(struct Chip8 *, u16);
-void opcode9XY0(struct Chip8 *, u16);
-void opcodeANNN(struct Chip8 *, u16);
-void opcodeBNNN(struct Chip8 *, u16);
-void opcodeCXNN(struct Chip8 *, u16);
-void opcodeDXYN(struct Chip8 *, u16);
-void opcodeEX__(struct Chip8 *, u16);
-void opcodeFX__(struct Chip8 *, u16);
-
-void ldSysFnt(struct Chip8 *);
-
-opcodeFtpr opcodes[0x10] = {
-	opcode0___,	/* 0x0 */
-	opcode1NNN,	/* 0x1 */
-	opcode2NNN,	/* 0x2 */
-	opcode3XNN,	/* 0x3 */
-	opcode4XNN,	/* 0x4 */
-	opcode5XY0,	/* 0x5 */
-	opcode6XNN,	/* 0x6 */
-	opcode7XNN,	/* 0x7 */
-	opcode8XY_,	/* 0x8 */
-	opcode9XY0,	/* 0x9 */
-	opcodeANNN,	/* 0xA */
-	opcodeBNNN,	/* 0xB */
-	opcodeCXNN,	/* 0xC */
-	opcodeDXYN,	/* 0xD */
-	opcodeEX__,	/* 0xE */
-	opcodeFX__	/* 0xF */
-};
-
-void ldSysData(struct Chip8 *c)
-{
-	int i;
-
-	for (i = 0; i < 0x10; i++) {
-		c->v[i] = 0x0;
-		c->key[i] = 0x0;
-		c->stk[i] = 0x0;
-	}
-	for (i = 0; i < 0x1000; i++) {
-		c->mem[i] = 0x0;
-	}
-	for (i = 0; i < 32 * 64; i++) {
-		c->disp[i] = 0x0;
-	}
-	ldSysFnt(c);
-	c->sp = 0;
-	c->pc = 0x200;
-	c->i = 0;
-	c->st = 0;
-	c->dt = 0;
-}
-
 void timeStep(struct Chip8 *c)
 {
 	if (c->dt > 0) {
@@ -85,31 +22,6 @@ void timeStep(struct Chip8 *c)
 	if (c->st > 0) {
 		c->st--;
 	}
-}
-
-void printChip8(struct Chip8 *c)
-{
-	int i;
-	
-	printf("[pc: %03x  i: %03x  sp: %01x  v:", c->pc, c->i, c->sp);
-	for (i = 0x0; i < 0x10; i++) {
-		printf(" %02x", c->v[i]);
-	}
-	puts("]");
-}
-
-void step(struct Chip8 *c)
-{
-	u16 op;
-
-	op = c->mem[c->pc] << 8 | c->mem[c->pc + 1];
-	/*	
-	printf("[op: %04x] ", op);
-	printChip8(c);
-	*/
-	opcodes[(op & 0xf000) >> 12](c, op);
-	c->pc += 2;
-
 }
 
 void opcode00E0(struct Chip8 *c, u16 op)
@@ -529,5 +441,58 @@ void ldSysFnt(struct Chip8 *c)
 	ldFntD(c->mem + 65);
 	ldFntE(c->mem + 70);
 	ldFntF(c->mem + 75);
+}
+
+void ldSysData(struct Chip8 *c)
+{
+	int i;
+
+	for (i = 0; i < 0x10; i++) {
+		c->v[i] = 0x0;
+		c->key[i] = 0x0;
+		c->stk[i] = 0x0;
+	}
+	for (i = 0; i < 0x1000; i++) {
+		c->mem[i] = 0x0;
+	}
+	for (i = 0; i < 32 * 64; i++) {
+		c->disp[i] = 0x0;
+	}
+	ldSysFnt(c);
+	c->sp = 0;
+	c->pc = 0x200;
+	c->i = 0;
+	c->st = 0;
+	c->dt = 0;
+}
+
+void step(struct Chip8 *c)
+{
+	u16 op;
+
+	op = c->mem[c->pc] << 8 | c->mem[c->pc + 1];
+
+	switch ((op & 0xf000) >> 12) {
+	case 0x0: opcode0___(c, op); break;
+	case 0x1: opcode1NNN(c, op); break;
+	case 0x2: opcode2NNN(c, op); break;
+	case 0x3: opcode3XNN(c, op); break;
+	case 0x4: opcode4XNN(c, op); break;
+	case 0x5: opcode5XY0(c, op); break;
+	case 0x6: opcode6XNN(c, op); break;
+	case 0x7: opcode7XNN(c, op); break;
+	case 0x8: opcode8XY_(c, op); break;
+	case 0x9: opcode9XY0(c, op); break;
+	case 0xa: opcodeANNN(c, op); break;
+	case 0xb: opcodeBNNN(c, op); break;
+	case 0xc: opcodeCXNN(c, op); break;
+	case 0xd: opcodeDXYN(c, op); break;
+	case 0xe: opcodeEX__(c, op); break;
+	case 0xf: opcodeFX__(c, op); break;
+	default: break;
+	}
+
+	c->pc += 2;
+
 }
 
