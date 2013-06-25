@@ -14,26 +14,26 @@
 #define	NNN(op) (op & 0xfff)
 #define	KKK(op) (op & 0xfff)
 
-typedef void (*opcodeFtpr) (struct chip8 *, u16);
+typedef void (*opcodeFtpr) (struct Chip8 *, u16);
 
-void opcode0___(struct chip8 *, u16);
-void opcode1NNN(struct chip8 *, u16);
-void opcode2NNN(struct chip8 *, u16);
-void opcode3XNN(struct chip8 *, u16);
-void opcode4XNN(struct chip8 *, u16);
-void opcode5XY0(struct chip8 *, u16);
-void opcode6XNN(struct chip8 *, u16);
-void opcode7XNN(struct chip8 *, u16);
-void opcode8XY_(struct chip8 *, u16);
-void opcode9XY0(struct chip8 *, u16);
-void opcodeANNN(struct chip8 *, u16);
-void opcodeBNNN(struct chip8 *, u16);
-void opcodeCXNN(struct chip8 *, u16);
-void opcodeDXYN(struct chip8 *, u16);
-void opcodeEX__(struct chip8 *, u16);
-void opcodeFX__(struct chip8 *, u16);
+void opcode0___(struct Chip8 *, u16);
+void opcode1NNN(struct Chip8 *, u16);
+void opcode2NNN(struct Chip8 *, u16);
+void opcode3XNN(struct Chip8 *, u16);
+void opcode4XNN(struct Chip8 *, u16);
+void opcode5XY0(struct Chip8 *, u16);
+void opcode6XNN(struct Chip8 *, u16);
+void opcode7XNN(struct Chip8 *, u16);
+void opcode8XY_(struct Chip8 *, u16);
+void opcode9XY0(struct Chip8 *, u16);
+void opcodeANNN(struct Chip8 *, u16);
+void opcodeBNNN(struct Chip8 *, u16);
+void opcodeCXNN(struct Chip8 *, u16);
+void opcodeDXYN(struct Chip8 *, u16);
+void opcodeEX__(struct Chip8 *, u16);
+void opcodeFX__(struct Chip8 *, u16);
 
-void ldSysFnt(struct chip8 *);
+void ldSysFnt(struct Chip8 *);
 
 opcodeFtpr opcodes[0x10] = {
 	opcode0___,	/* 0x0 */
@@ -54,7 +54,7 @@ opcodeFtpr opcodes[0x10] = {
 	opcodeFX__	/* 0xF */
 };
 
-void ldSysData(struct chip8 *c)
+void ldSysData(struct Chip8 *c)
 {
 	int i;
 
@@ -77,7 +77,7 @@ void ldSysData(struct chip8 *c)
 	c->dt = 0;
 }
 
-void timeStep(struct chip8 *c)
+void timeStep(struct Chip8 *c)
 {
 	if (c->dt > 0) {
 		c->dt--;
@@ -87,7 +87,7 @@ void timeStep(struct chip8 *c)
 	}
 }
 
-void printChip8(struct chip8 *c)
+void printChip8(struct Chip8 *c)
 {
 	int i;
 	
@@ -98,7 +98,7 @@ void printChip8(struct chip8 *c)
 	puts("]");
 }
 
-void step(struct chip8 *c)
+void step(struct Chip8 *c)
 {
 	u16 op;
 
@@ -112,7 +112,7 @@ void step(struct chip8 *c)
 
 }
 
-void opcode00E0(struct chip8 *c, u16 op)
+void opcode00E0(struct Chip8 *c, u16 op)
 {
 	int x, y;
 	for (y = 0; y < 32; y++) {
@@ -122,13 +122,13 @@ void opcode00E0(struct chip8 *c, u16 op)
 	}
 }
 
-void opcode00EE(struct chip8 *c, u16 op)
+void opcode00EE(struct Chip8 *c, u16 op)
 {
 	c->sp--;
 	c->pc = c->stk[c->sp];
 }
 
-void opcode0___(struct chip8 *c, u16 op)
+void opcode0___(struct Chip8 *c, u16 op)
 {
 	switch (op & 0xff) {
 	case 0xe0: opcode00E0(c, op); break;
@@ -137,51 +137,51 @@ void opcode0___(struct chip8 *c, u16 op)
 	}
 }
 
-void opcode1NNN(struct chip8 *c, u16 op)
+void opcode1NNN(struct Chip8 *c, u16 op)
 {
 	c->pc = NNN(op);
 	c->pc -= 2;
 }
 
-void opcode2NNN(struct chip8 *c, u16 op)
+void opcode2NNN(struct Chip8 *c, u16 op)
 {
 	c->stk[c->sp] = c->pc;
 	c->sp++;
 	c->pc = NNN(op);
 }
 
-void opcode3XNN(struct chip8 *c, u16 op)
+void opcode3XNN(struct Chip8 *c, u16 op)
 {
 	if (c->v[X(op)] == KK(op)) {
 		c->pc += 2;
 	}
 }
 
-void opcode4XNN(struct chip8 *c, u16 op)
+void opcode4XNN(struct Chip8 *c, u16 op)
 {
 	if (c->v[X(op)] != KK(op)) {
 		c->pc += 2;
 	}
 }
 
-void opcode5XY0(struct chip8 *c, u16 op)
+void opcode5XY0(struct Chip8 *c, u16 op)
 {
 	if (c->v[X(op)] == c->v[Y(op)]) {
 		c->pc += 2;
 	}
 }
 
-void opcode6XNN(struct chip8 *c, u16 op)
+void opcode6XNN(struct Chip8 *c, u16 op)
 {
 	c->v[X(op)] = NN(op);
 }
 
-void opcode7XNN(struct chip8 *c, u16 op)
+void opcode7XNN(struct Chip8 *c, u16 op)
 {
 	c->v[X(op)] += NN(op);
 }
 
-void opcode8XY4(struct chip8 *c, u16 op)
+void opcode8XY4(struct Chip8 *c, u16 op)
 {
 	u16 vx, vy, res;
 
@@ -192,7 +192,7 @@ void opcode8XY4(struct chip8 *c, u16 op)
 	c->v[X(op)] = res & 0xff;
 }
 
-void opcode8XY5(struct chip8 *c, u16 op)
+void opcode8XY5(struct Chip8 *c, u16 op)
 {
 	u16 vx, vy, res;
 
@@ -203,13 +203,13 @@ void opcode8XY5(struct chip8 *c, u16 op)
 	c->v[X(op)] = res;
 }
 
-void opcode8XY6(struct chip8 *c, u16 op)
+void opcode8XY6(struct Chip8 *c, u16 op)
 {
 	c->v[0xf] = c->v[Y(op)] & 0x1;
 	c->v[X(op)] = c->v[Y(op)] >> 1;
 }
 
-void opcode8XY7(struct chip8 *c, u16 op)
+void opcode8XY7(struct Chip8 *c, u16 op)
 {
 	u16 vx, vy, res;
 
@@ -220,13 +220,13 @@ void opcode8XY7(struct chip8 *c, u16 op)
 	c->v[X(op)] = res;
 }
 
-void opcode8XYE(struct chip8 *c, u16 op)
+void opcode8XYE(struct Chip8 *c, u16 op)
 {
 	c->v[0xf] = c->v[Y(op)] >> 7;
 	c->v[X(op)] = c->v[Y(op)] << 1;
 }
 
-void opcode8XY_(struct chip8 *c, u16 op)
+void opcode8XY_(struct Chip8 *c, u16 op)
 {
 	switch (K(op)) {
 	case 0x0: c->v[X(op)] = c->v[Y(op)]; break;
@@ -242,30 +242,30 @@ void opcode8XY_(struct chip8 *c, u16 op)
 	}
 }
 
-void opcode9XY0(struct chip8 *c, u16 op)
+void opcode9XY0(struct Chip8 *c, u16 op)
 {
 	if (c->v[X(op)] != c->v[Y(op)]) {
 		c->pc += 2;
 	}
 }
 
-void opcodeANNN(struct chip8 *c, u16 op)
+void opcodeANNN(struct Chip8 *c, u16 op)
 {
 	c->i = KKK(op);
 }
 
-void opcodeBNNN(struct chip8 *c, u16 op)
+void opcodeBNNN(struct Chip8 *c, u16 op)
 {
 	c->pc = NNN(op) + c->v[0x0];
 	c->pc -= 2;
 }
 
-void opcodeCXNN(struct chip8 *c, u16 op)
+void opcodeCXNN(struct Chip8 *c, u16 op)
 {
 	c->v[X(op)] = ((u8) (rand() % 256)) & KK(op);
 }
 
-void opcodeDXYN(struct chip8 *c, u16 op)
+void opcodeDXYN(struct Chip8 *c, u16 op)
 {
 	u16 x, y, n, p, u, w, d, a, b;
 
@@ -286,21 +286,21 @@ void opcodeDXYN(struct chip8 *c, u16 op)
 	}
 }
 
-void opcodeEX9E(struct chip8 *c, u16 op)
+void opcodeEX9E(struct Chip8 *c, u16 op)
 {
 	if (c->key[c->v[X(op)]]) {
 		c->pc += 2;
 	}
 }
 
-void opcodeEXA1(struct chip8 *c, u16 op)
+void opcodeEXA1(struct Chip8 *c, u16 op)
 {
 	if (!c->key[c->v[X(op)]]) {
 		c->pc += 2;
 	}
 }
 
-void opcodeEX__(struct chip8 *c, u16 op)
+void opcodeEX__(struct Chip8 *c, u16 op)
 {
 	switch (KK(op)) {
 	case 0x9e: opcodeEX9E(c, op); break;
@@ -309,13 +309,13 @@ void opcodeEX__(struct chip8 *c, u16 op)
 	}
 }
 
-void opcodeFX1E(struct chip8 *c, u16 op)
+void opcodeFX1E(struct Chip8 *c, u16 op)
 {
 	c->i += c->v[X(op)];
 	c->v[0xf] = c->i > 0xfff;
 }
 
-void opcodeFX0A(struct chip8 *c, u16 op)
+void opcodeFX0A(struct Chip8 *c, u16 op)
 {
 	u8 i;
 	for (i = 0x0; i < 0x10; i++) {
@@ -327,31 +327,31 @@ void opcodeFX0A(struct chip8 *c, u16 op)
 	c->pc -= 2;
 }
 
-void opcodeFX29(struct chip8 *c, u16 op)
+void opcodeFX29(struct Chip8 *c, u16 op)
 {
 	c->i = (c->v[X(op)] & 0xf) * 5;
 }
 
-void opcodeFX33(struct chip8 *c, u16 op)
+void opcodeFX33(struct Chip8 *c, u16 op)
 {
 	c->mem[c->i] = c->v[X(op)] / 100;
 	c->mem[c->i + 1] = c->v[X(op)] % 100 / 10;
 	c->mem[c->i + 2] = c->v[X(op)] % 10;
 }
 
-void opcodeFX55(struct chip8 *c, u16 op)
+void opcodeFX55(struct Chip8 *c, u16 op)
 {
 	memcpy(c->mem + c->i, c->v, X(op) + 1);
 	c->i += X(op) + 1;
 }
 
-void opcodeFX65(struct chip8 *c, u16 op)
+void opcodeFX65(struct Chip8 *c, u16 op)
 {
 	memcpy(c->v, c->mem + c->i, X(op) + 1);
 	c->i += X(op) + 1;
 }
 
-void opcodeFX__(struct chip8 *c, u16 op)
+void opcodeFX__(struct Chip8 *c, u16 op)
 {
 	switch (KK(op)) {
 	case 0x07: c->v[X(op)] = c->dt;	break;
@@ -511,7 +511,7 @@ void ldFntF(u8 * mem)
 	mem[4] = 0x80;
 }
 
-void ldSysFnt(struct chip8 *c)
+void ldSysFnt(struct Chip8 *c)
 {
 	ldFnt0(c->mem + 0);
 	ldFnt1(c->mem + 5);

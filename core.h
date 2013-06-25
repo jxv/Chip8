@@ -6,7 +6,7 @@
 typedef unsigned char u8;
 typedef unsigned short int u16;
 
-struct chip8 {
+struct Chip8 {
 	u8 v[0x10];
 	u8 mem[0x1000];
 	u16 stk[0xc];
@@ -19,8 +19,8 @@ struct chip8 {
 	u8 disp[32 * 64];
 };
 
-void ldSysData(struct chip8 *);
-void timeStep(struct chip8 *);
-void step(struct chip8 *);
+void ldSysData(struct Chip8 *);
+void timeStep(struct Chip8 *);
+void step(struct Chip8 *);
 
 #endif
