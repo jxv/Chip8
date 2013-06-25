@@ -8,7 +8,7 @@ Usage:
 Input:
 
 	7 8 9 0
-	u i o \[
+	u i o [
 	j k l ;
 	m , . /
 
