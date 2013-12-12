@@ -1,9 +1,9 @@
-Chip8Emulator
+Chip8 Emulator
 =============
 
 Usage:
 
-	./Chip8Emulator PATH_TO_ROM
+	./chip8 PATH_TO_ROM
 
 Input:
 

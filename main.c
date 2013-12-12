@@ -23,7 +23,7 @@ int rdRom(struct Chip8 *c, char *p)
 	}
 	i = 0x200;
 	while (i < 0xFFF && ((x = fgetc(fp)) != EOF)) {
-		c->mem[i] = x;
+		c->memory[i] = x;
 		i++;
 	}
 	fclose(fp);
@@ -62,18 +62,19 @@ void keys(struct Chip8 *c, Uint8 * ks)
 
 void draw(struct Chip8 *c, SDL_Surface * s)
 {
-	int x, y, q;
+	int x, y;
+	bool q;
 	Uint8 *p;
 	Uint8 st, bg, fg, cl;
 
 	st = 0xa0;
 	bg = 0x01;
 	fg = 0x0b;
-	cl = c->st ? st : fg;
+	cl = c->sound_timer ? st : fg;
 	for (y = 0; y < 32; y++) {
 		for (x = 0; x < 64; x++) {
 			p = (Uint8 *) s->pixels + x * s->format->BytesPerPixel + y * s->pitch;
-			q = c->disp[y * 64 + x];
+			q = c->display[y * 64 + x];
 			*p = q ? cl : bg;
 		}
 	}
@@ -82,19 +83,19 @@ void draw(struct Chip8 *c, SDL_Surface * s)
 void exec(struct Chip8 *c, SDL_Surface * s)
 {
 	SDL_Event e;
-	int q = 0;
+	bool q = false;
 	Uint8 *ks;
 	ks = SDL_GetKeyState(NULL);
 	while (!q) {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) {
-				q = 1;
+				q = true;
 			}
 		}
 		ks = SDL_GetKeyState(NULL);
 		keys(c, ks);
-		timeStep(c);
-		step(c);
+		chip8_time_step(c);
+		chip8_step(c);
 		draw(c, s);
 		SDL_Delay(20);	/* aprx. 60Hz */
 		SDL_Flip(s);
@@ -111,7 +112,7 @@ int main(int argc, char *argv[])
 	if (err != 0) {
 		return err;
 	}
-	ldSysData(&c);
+	chip8_load_system(&c);
 	err = rdRom(&c, argv[1]);
 	if (err != 0) {
 		return err;
