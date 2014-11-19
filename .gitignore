@@ -1,3 +1,5 @@
-Chip8Emulator
+chip8
+.*
 *.swp
+*.o
 roms/*

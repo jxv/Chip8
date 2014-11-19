@@ -1,8 +1,8 @@
 LIBS = `sdl-config --libs`
-CFLAGS = -Wall -pedantic -Werror `sdl-config --cflags` -std=c11
+CFLAGS = -Wall -pedantic -Werror -DDEBUG `sdl-config --cflags` -std=c99
 CC = gcc
 OUT = chip8
-SRC = core.c main.c
+SRC = chip8.c main.c
 RM = rm
 
 all: 
