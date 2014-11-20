@@ -55,8 +55,8 @@ static void keys(chip8_t *c, const u8 *ks)
 static void draw(const chip8_t *c, SDL_Surface *s)
 {
 	const u8 sound_color = 0xa0;
-	const u8 bg_color = 0x01;
-	const u8 fg_color = 0x0b;
+	const u8 bg_color = 0x00;
+	const u8 fg_color = 0xff;
 	const u8 color = c->sound_timer ? sound_color : fg_color;
 	for (int y = 0; y < 32; y++) {
 		for (int x = 0; x < 64; x++) {
