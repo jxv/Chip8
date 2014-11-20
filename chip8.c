@@ -28,6 +28,7 @@ static void nop(u16 op, chip8_t *c)
 	(void)op;
 #else
 	fprintf(stderr, "addr:0x%.4x nop:0x%.4x\n", c->pc, op);
+	exit(EXIT_FAILURE);
 #endif
 }
 
@@ -53,6 +54,7 @@ static void opcode_0___(u16 op, chip8_t *c)
 		opcode_00ee(op, c);
 		break;
 	default:
+		nop(op, c);
 		break;	/* no rca */
 	}
 }
@@ -136,42 +138,36 @@ static void opcode_8xy3(u16 op, chip8_t *c)
 
 static void opcode_8xy4(u16 op, chip8_t *c)
 {
-	const u16 res = (u16)c->v[X(op)] + (u16)c->v[Y(op)];
+	c->v[0xf] = 255 < (u16)c->v[X(op)] + (u16)c->v[Y(op)];
 	c->v[X(op)] = c->v[X(op)] + c->v[Y(op)];
-	c->v[0xf] = res > 255;
 	c->pc += 2;
 }
 
 static void opcode_8xy5(u16 op, chip8_t *c)
 {
-	const u8 no_borrow = c->v[X(op)] >= c->v[Y(op)];
+	c->v[0xf] = c->v[X(op)] >= c->v[Y(op)];
 	c->v[X(op)] -= c->v[Y(op)];
-	c->v[0xf] = no_borrow;
 	c->pc += 2;
 }
 
 static void opcode_8xy6(u16 op, chip8_t *c)
 {
-	const u8 vx = c->v[X(op)];
+	c->v[0xf] = c->v[X(op)] & 0x01;
 	c->v[X(op)] >>= 1;
-	c->v[0xf] = vx & 0x01;
 	c->pc += 2;
 }
 
 static void opcode_8xy7(u16 op, chip8_t *c)
 {
-	const u16 vx = c->v[X(op)];
-	const u16 vy = c->v[Y(op)];
+	c->v[0xf] = c->v[Y(op)] > c->v[X(op)];
 	c->v[X(op)] = c->v[Y(op)] - c->v[X(op)];
-	c->v[0xf] = vx > vy;
 	c->pc += 2;
 }
 
 static void opcode_8xye(u16 op, chip8_t *c)
 {
-	const u8 vx = c->v[X(op)];
+	c->v[0xf] = (c->v[X(op)] & 0x80) >> 7;
 	c->v[X(op)] <<= 1;
-	c->v[0xf] = vx >> 7;
 	c->pc += 2;
 }
 
@@ -195,7 +191,7 @@ static void opcode_8xy_(u16 op, chip8_t *c)
 		[0xe] = opcode_8xye,
 		[0xf] = nop,
 	};
-	opcode_8___[K(op)](op, c);
+	opcode_8___[op & 0x000f](op, c);
 }
 
 static void opcode_9xy0(u16 op, chip8_t *c)
@@ -214,12 +210,12 @@ static void opcode_annn(u16 op, chip8_t *c)
 
 static void opcode_bnnn(u16 op, chip8_t *c)
 {
-	c->pc = NNN(op) + c->v[0x0];
+	c->pc = (u16)NNN(op) + (u16)c->v[0x0];
 }
 
 static void opcode_cxnn(u16 op, chip8_t *c)
 {
-	c->v[X(op)] = ((u8)rand()) & KK(op);
+	c->v[X(op)] = (u8)rand() & KK(op);
 	c->pc += 2;
 }
 
@@ -268,6 +264,7 @@ static void opcode_ex__(u16 op, chip8_t *c)
 		opcode_exa1(op, c);
 		break;
 	default:
+		nop(op, c);
 		break;
 	}
 }
@@ -283,15 +280,9 @@ static void opcode_fx0a(u16 op, chip8_t *c)
 	for (u8 i = 0x0; i < 0x10; i++)
 		if (c->key[i]) {
 			c->v[X(op)] = i;
+			c->pc += 2;
 			return;
 		}
-}
-
-static void opcode_fx1e(u16 op, chip8_t *c)
-{
-	c->idr_addr += c->v[X(op)];
-	c->v[0xf] = c->idr_addr > 0xfff;
-	c->pc += 2;
 }
 
 static void opcode_fx15(u16 op, chip8_t *c)
@@ -300,15 +291,23 @@ static void opcode_fx15(u16 op, chip8_t *c)
 	c->pc += 2;
 }
 
+
 static void opcode_fx18(u16 op, chip8_t *c)
 {
 	c->sound_timer = c->v[X(op)];
 	c->pc += 2;
 }
 
+static void opcode_fx1e(u16 op, chip8_t *c)
+{
+	c->idr_addr += (u16)c->v[X(op)];
+	/* c->v[0xf] = c->idr_addr > 0xfff; */
+	c->pc += 2;
+}
+
 static void opcode_fx29(u16 op, chip8_t *c)
 {
-	c->idr_addr = (c->v[X(op)] & 0xf) * 5;
+	c->idr_addr = (u16)c->v[X(op)] * 5;
 	c->pc += 2;
 }
 
@@ -365,6 +364,7 @@ static void opcode_fx__(u16 op, chip8_t *c)
 		opcode_fx65(op, c);
 		break;
 	default:
+		nop(op, c);
 		break;
 	}
 }
