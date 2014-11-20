@@ -21,7 +21,7 @@ void chip8_time_step(chip8_t *c)
 		c->sound_timer--;
 }
 
-static void nop(chip8_t *c, u16 op)
+static void nop(u16 op, chip8_t *c)
 {
 #ifdef NDEBUG
 	(void)c;
@@ -31,45 +31,45 @@ static void nop(chip8_t *c, u16 op)
 #endif
 }
 
-static void opcode_00e0(chip8_t *c, u16 op)
+static void opcode_00e0(u16 op, chip8_t *c)
 {
 	memset(c->display, 0x00, sizeof(*c->display) * 32 * 64);
 	c->pc += 2;
 }
 
-static void opcode_00ee(chip8_t *c, u16 op)
+static void opcode_00ee(u16 op, chip8_t *c)
 {
 	c->sp--;
 	c->pc = c->stack[c->sp];
 }
 
-static void opcode_0___(chip8_t *c, u16 op)
+static void opcode_0___(u16 op, chip8_t *c)
 {
 	switch (op & 0xff) {
 	case 0xe0:
-		opcode_00e0(c, op);
+		opcode_00e0(op, c);
 		break;
 	case 0xee:
-		opcode_00ee(c, op);
+		opcode_00ee(op, c);
 		break;
 	default:
 		break;	/* no rca */
 	}
 }
 
-static void opcode_1nnn(chip8_t *c, u16 op)
+static void opcode_1nnn(u16 op, chip8_t *c)
 {
 	c->pc = NNN(op);
 }
 
-static void opcode_2nnn(chip8_t *c, u16 op)
+static void opcode_2nnn(u16 op, chip8_t *c)
 {
 	c->stack[c->sp] = c->pc + 2;
 	c->sp++;
 	c->pc = NNN(op);
 }
 
-static void opcode_3xnn(chip8_t *c, u16 op)
+static void opcode_3xnn(u16 op, chip8_t *c)
 {
 	if (c->v[X(op)] == KK(op))
 		c->pc += 4;
@@ -77,7 +77,7 @@ static void opcode_3xnn(chip8_t *c, u16 op)
 		c->pc += 2;
 }
 
-static void opcode_4xnn(chip8_t *c, u16 op)
+static void opcode_4xnn(u16 op, chip8_t *c)
 {
 	if (c->v[X(op)] != KK(op))
 		c->pc += 4;
@@ -85,7 +85,7 @@ static void opcode_4xnn(chip8_t *c, u16 op)
 		c->pc += 2;
 }
 
-static void opcode_5xy0(chip8_t *c, u16 op)
+static void opcode_5xy0(u16 op, chip8_t *c)
 {
 	if (c->v[X(op)] == c->v[Y(op)])
 		c->pc += 4;
@@ -93,43 +93,48 @@ static void opcode_5xy0(chip8_t *c, u16 op)
 		c->pc += 2;
 }
 
-static void opcode_6xnn(chip8_t *c, u16 op)
+static void opcode_5xy_(u16 op, chip8_t *c)
+{
+	((op & 0x000f) == 0x0000 ? opcode_5xy0 : nop)(op, c);
+}
+
+static void opcode_6xnn(u16 op, chip8_t *c)
 {
 	c->v[X(op)] = NN(op);
 	c->pc += 2;
 }
 
-static void opcode_7xnn(chip8_t *c, u16 op)
+static void opcode_7xnn(u16 op, chip8_t *c)
 {
 	c->v[X(op)] += NN(op);
 	c->pc += 2;
 }
 
-static void opcode_8xy0(chip8_t *c, u16 op)
+static void opcode_8xy0(u16 op, chip8_t *c)
 {
 	c->v[X(op)] = c->v[Y(op)];
 	c->pc += 2;
 }
 
-static void opcode_8xy1(chip8_t *c, u16 op)
+static void opcode_8xy1(u16 op, chip8_t *c)
 {
 	c->v[X(op)] |= c->v[Y(op)];
 	c->pc += 2;
 }
 
-static void opcode_8xy2(chip8_t *c, u16 op)
+static void opcode_8xy2(u16 op, chip8_t *c)
 {
 	c->v[X(op)] &= c->v[Y(op)];
 	c->pc += 2;
 }
 
-static void opcode_8xy3(chip8_t *c, u16 op)
+static void opcode_8xy3(u16 op, chip8_t *c)
 {
 	c->v[X(op)] ^= c->v[Y(op)];
 	c->pc += 2;
 }
 
-static void opcode_8xy4(chip8_t *c, u16 op)
+static void opcode_8xy4(u16 op, chip8_t *c)
 {
 	const u16 res = (u16)c->v[X(op)] + (u16)c->v[Y(op)];
 	c->v[X(op)] = c->v[X(op)] + c->v[Y(op)];
@@ -137,7 +142,7 @@ static void opcode_8xy4(chip8_t *c, u16 op)
 	c->pc += 2;
 }
 
-static void opcode_8xy5(chip8_t *c, u16 op)
+static void opcode_8xy5(u16 op, chip8_t *c)
 {
 	const u8 no_borrow = c->v[X(op)] >= c->v[Y(op)];
 	c->v[X(op)] -= c->v[Y(op)];
@@ -145,7 +150,7 @@ static void opcode_8xy5(chip8_t *c, u16 op)
 	c->pc += 2;
 }
 
-static void opcode_8xy6(chip8_t *c, u16 op)
+static void opcode_8xy6(u16 op, chip8_t *c)
 {
 	const u8 vx = c->v[X(op)];
 	c->v[X(op)] >>= 1;
@@ -153,7 +158,7 @@ static void opcode_8xy6(chip8_t *c, u16 op)
 	c->pc += 2;
 }
 
-static void opcode_8xy7(chip8_t *c, u16 op)
+static void opcode_8xy7(u16 op, chip8_t *c)
 {
 	const u16 vx = c->v[X(op)];
 	const u16 vy = c->v[Y(op)];
@@ -162,7 +167,7 @@ static void opcode_8xy7(chip8_t *c, u16 op)
 	c->pc += 2;
 }
 
-static void opcode_8xye(chip8_t *c, u16 op)
+static void opcode_8xye(u16 op, chip8_t *c)
 {
 	const u8 vx = c->v[X(op)];
 	c->v[X(op)] <<= 1;
@@ -170,9 +175,9 @@ static void opcode_8xye(chip8_t *c, u16 op)
 	c->pc += 2;
 }
 
-static void opcode_8xy_(chip8_t *c, u16 op)
+static void opcode_8xy_(u16 op, chip8_t *c)
 {
-	static void (*opcode_8___[0x10])(chip8_t *, u16) = {
+	static void (*opcode_8___[0x10])(u16, chip8_t *) = {
 		[0x0] = opcode_8xy0,
 		[0x1] = opcode_8xy1,
 		[0x2] = opcode_8xy2,
@@ -190,10 +195,10 @@ static void opcode_8xy_(chip8_t *c, u16 op)
 		[0xe] = opcode_8xye,
 		[0xf] = nop,
 	};
-	opcode_8___[K(op)](c, op);
+	opcode_8___[K(op)](op, c);
 }
 
-static void opcode_9xy0(chip8_t *c, u16 op)
+static void opcode_9xy0(u16 op, chip8_t *c)
 {
 	if (c->v[X(op)] != c->v[Y(op)])
 		c->pc += 4;
@@ -201,24 +206,24 @@ static void opcode_9xy0(chip8_t *c, u16 op)
 		c->pc += 2;
 }
 
-static void opcode_annn(chip8_t *c, u16 op)
+static void opcode_annn(u16 op, chip8_t *c)
 {
 	c->idr_addr = KKK(op);
 	c->pc += 2;
 }
 
-static void opcode_bnnn(chip8_t *c, u16 op)
+static void opcode_bnnn(u16 op, chip8_t *c)
 {
 	c->pc = NNN(op) + c->v[0x0];
 }
 
-static void opcode_cxnn(chip8_t *c, u16 op)
+static void opcode_cxnn(u16 op, chip8_t *c)
 {
 	c->v[X(op)] = ((u8)rand()) & KK(op);
 	c->pc += 2;
 }
 
-static void opcode_dxyn(chip8_t *c, u16 op)
+static void opcode_dxyn(u16 op, chip8_t *c)
 {
 	const u16 x = X(op);
 	const u16 y = Y(op);
@@ -237,7 +242,7 @@ static void opcode_dxyn(chip8_t *c, u16 op)
 	c->pc += 2;
 }
 
-static void opcode_ex9e(chip8_t *c, u16 op)
+static void opcode_ex9e(u16 op, chip8_t *c)
 {
 	if (c->key[c->v[X(op)]])
 		c->pc += 4;
@@ -245,7 +250,7 @@ static void opcode_ex9e(chip8_t *c, u16 op)
 		c->pc += 2;
 }
 
-static void opcode_exa1(chip8_t *c, u16 op)
+static void opcode_exa1(u16 op, chip8_t *c)
 {
 	if (!c->key[c->v[X(op)]])
 		c->pc += 4;
@@ -253,27 +258,27 @@ static void opcode_exa1(chip8_t *c, u16 op)
 		c->pc += 2;
 }
 
-static void opcode_ex__(chip8_t *c, u16 op)
+static void opcode_ex__(u16 op, chip8_t *c)
 {
 	switch (KK(op)) {
 	case 0x9e:
-		opcode_ex9e(c, op);
+		opcode_ex9e(op, c);
 		break;
 	case 0xa1:
-		opcode_exa1(c, op);
+		opcode_exa1(op, c);
 		break;
 	default:
 		break;
 	}
 }
 
-static void opcode_fx07(chip8_t *c, u16 op)
+static void opcode_fx07(u16 op, chip8_t *c)
 {
 	c->v[X(op)] = c->delay_timer;
 	c->pc += 2;
 }
 
-static void opcode_fx0a(chip8_t *c, u16 op)
+static void opcode_fx0a(u16 op, chip8_t *c)
 {
 	for (u8 i = 0x0; i < 0x10; i++)
 		if (c->key[i]) {
@@ -282,32 +287,32 @@ static void opcode_fx0a(chip8_t *c, u16 op)
 		}
 }
 
-static void opcode_fx1e(chip8_t *c, u16 op)
+static void opcode_fx1e(u16 op, chip8_t *c)
 {
 	c->idr_addr += c->v[X(op)];
 	c->v[0xf] = c->idr_addr > 0xfff;
 	c->pc += 2;
 }
 
-static void opcode_fx15(chip8_t *c, u16 op)
+static void opcode_fx15(u16 op, chip8_t *c)
 {
 	c->delay_timer = c->v[X(op)];
 	c->pc += 2;
 }
 
-static void opcode_fx18(chip8_t *c, u16 op)
+static void opcode_fx18(u16 op, chip8_t *c)
 {
 	c->sound_timer = c->v[X(op)];
 	c->pc += 2;
 }
 
-static void opcode_fx29(chip8_t *c, u16 op)
+static void opcode_fx29(u16 op, chip8_t *c)
 {
 	c->idr_addr = (c->v[X(op)] & 0xf) * 5;
 	c->pc += 2;
 }
 
-static void opcode_fx33(chip8_t *c, u16 op)
+static void opcode_fx33(u16 op, chip8_t *c)
 {
 	c->mem[c->idr_addr] = c->v[X(op)] / 100;
 	c->mem[c->idr_addr + 1] = c->v[X(op)] % 100 / 10;
@@ -315,49 +320,49 @@ static void opcode_fx33(chip8_t *c, u16 op)
 	c->pc += 2;
 }
 
-static void opcode_fx55(chip8_t *c, u16 op)
+static void opcode_fx55(u16 op, chip8_t *c)
 {
 	memcpy(c->mem + c->idr_addr, c->v, X(op) + 1);
 	c->idr_addr += X(op) + 1;
 	c->pc += 2;
 }
 
-static void opcode_fx65(chip8_t *c, u16 op)
+static void opcode_fx65(u16 op, chip8_t *c)
 {
 	memcpy(c->v, c->mem + c->idr_addr, X(op) + 1);
 	c->idr_addr += X(op) + 1;
 	c->pc += 2;
 }
 
-static void opcode_fx__(chip8_t *c, u16 op)
+static void opcode_fx__(u16 op, chip8_t *c)
 {
 	switch (KK(op)) {
 	case 0x07:
-		opcode_fx07(c, op);
+		opcode_fx07(op, c);
 		break;
 	case 0x0a:
-		opcode_fx0a(c, op);
+		opcode_fx0a(op, c);
 		break;
 	case 0x15:
-		opcode_fx15(c, op);
+		opcode_fx15(op, c);
 		break;
 	case 0x18:
-		opcode_fx18(c, op);
+		opcode_fx18(op, c);
 		break;
 	case 0x1e:
-		opcode_fx1e(c, op);
+		opcode_fx1e(op, c);
 		break;
 	case 0x29:
-		opcode_fx29(c, op);
+		opcode_fx29(op, c);
 		break;
 	case 0x33:
-		opcode_fx33(c, op);
+		opcode_fx33(op, c);
 		break;
 	case 0x55:
-		opcode_fx55(c, op);
+		opcode_fx55(op, c);
 		break;
 	case 0x65:
-		opcode_fx65(c, op);
+		opcode_fx65(op, c);
 		break;
 	default:
 		break;
@@ -545,13 +550,13 @@ void chip8_load_system(chip8_t *c)
 
 void chip8_step(chip8_t *c)
 {
-	static void (*opcode_____[0x10])(chip8_t *, u16) = {
+	static void (*opcode_____[0x10])(u16, chip8_t *) = {
 		[0x0] = opcode_0___,
 		[0x1] = opcode_1nnn,
 		[0x2] = opcode_2nnn,
 		[0x3] = opcode_3xnn,
 		[0x4] = opcode_4xnn,
-		[0x5] = opcode_5xy0,
+		[0x5] = opcode_5xy_,
 		[0x6] = opcode_6xnn,
 		[0x7] = opcode_7xnn,
 		[0x8] = opcode_8xy_,
@@ -570,5 +575,5 @@ void chip8_step(chip8_t *c)
 	 * printf("%d: 0x%.4x: 0x%.4x:\n", i, c->pc, op);
 	 * i++;
 	 */
-	opcode_____[(op & 0xf000) >> 12](c, op);
+	opcode_____[(op & 0xf000) >> 12](op, c);
 }
