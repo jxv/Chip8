@@ -569,7 +569,7 @@ void chip8_step(chip8_t *c)
 		[0xf] = opcode_fx__,
 	};
 	const u16 op = c->mem[c->pc] << 8 | c->mem[c->pc + 1];
-#ifndef NDBEUG
+#ifndef NDEBUG
 	static int i = 0;
 	fprintf(stderr, "%d: 0x%.4x: 0x%.4x:\n", i, c->pc, op);
 	i++;
