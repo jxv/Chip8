@@ -1,6 +1,7 @@
 #include "backend.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <memory.h>
 #include <errno.h>
 #include <time.h>
 #include <xcb/xcb.h>
@@ -39,6 +40,7 @@ void open_window()
 		const uint32_t values[2] = {
 			[0] = screen->white_pixel,
 			[1] = XCB_EVENT_MASK_EXPOSURE
+			    | XCB_EVENT_MASK_KEY_PRESS
 		};
 		xcb_create_window(conn,
 				  XCB_COPY_FROM_PARENT, /* depth */
@@ -72,20 +74,42 @@ void close_window()
 
 bool keys(chip8_t *c)
 {
+	static bool ks[0xff];
+	memset(ks, false, sizeof(bool) * 0xff);
 	xcb_generic_event_t *event = NULL;
+	/* Event loop. */
 	while ((event = xcb_poll_for_event(conn))) {
 		switch (event->response_type & ~0x80) {
 		case XCB_CLIENT_MESSAGE:
 			if (((xcb_client_message_event_t*)event)->data.data32[0]
-			    == reply2->atom) {
+			    == reply2->atom)
 				return true;
-			}
+			break;
+		case XCB_KEY_PRESS:
+			ks[((xcb_key_press_event_t*)event)->detail] = true;
 			break;
 		default:
 			break;
 		}
 		free(event);
 	}
+	/* Copy key states. */
+	c->key[0x0] = ks[59]; /* , */
+	c->key[0x1] = ks[16]; /* 7 */
+	c->key[0x2] = ks[17]; /* 8 */
+	c->key[0x3] = ks[18]; /* 9 */
+	c->key[0x4] = ks[30]; /* u */
+	c->key[0x5] = ks[31]; /* i */
+	c->key[0x6] = ks[32]; /* o */
+	c->key[0x7] = ks[44]; /* j */
+	c->key[0x8] = ks[45]; /* k */
+	c->key[0x9] = ks[46]; /* l */
+	c->key[0xa] = ks[58]; /* m */
+	c->key[0xb] = ks[60]; /* . */
+	c->key[0xc] = ks[19]; /* 0 */
+	c->key[0xd] = ks[33]; /* p */
+	c->key[0xe] = ks[47]; /* ; */
+	c->key[0xf] = ks[61]; /* / */
 	return false;
 }
 
@@ -111,6 +135,8 @@ void draw(const chip8_t *c)
 
 void sync()
 {
+	/* Draw to window. */
+	xcb_flush(conn);
 	/* Delay ~16 milliseconds == 60Hz. */
 	const struct timespec req = {
 		.tv_sec = 0,
@@ -132,6 +158,4 @@ void sync()
 		default:
 			break;
 		}
-	/* Draw to window. */
-	xcb_flush(conn);
 }
