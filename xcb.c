@@ -91,6 +91,9 @@ bool keys(chip8_t *c)
 
 void draw(const chip8_t *c)
 {
+	/* Clear screen. */
+	xcb_clear_area(conn, 0, window, 0, 0, 64, 32);
+	/* Find and draw pixels. */
 	static xcb_point_t point_buf[64 * 32];
 	int numpoint = 0;
 	for (int y = 0; y < 32; y++)
@@ -102,17 +105,16 @@ void draw(const chip8_t *c)
 				};
 				numpoint++;
 			}
-	xcb_clear_area(conn, 0, window, 0, 0, 64, 32);
 	xcb_poly_point(conn, XCB_COORD_MODE_ORIGIN, window, foreground,
 		       numpoint, point_buf);
-	xcb_flush(conn);
 }
 
 void sync()
 {
+	/* Delay ~16 milliseconds == 60Hz. */
 	const struct timespec req = {
 		.tv_sec = 0,
-		.tv_nsec = 16 * 1000 * 1000, /* delay */
+		.tv_nsec = 16 * 1000 * 1000,
 	};
 	struct timespec rem;
 	const int s = nanosleep(&req, &rem);
@@ -130,4 +132,6 @@ void sync()
 		default:
 			break;
 		}
+	/* Draw to window. */
+	xcb_flush(conn);
 }

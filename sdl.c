@@ -60,6 +60,6 @@ void draw(const chip8_t *c)
 
 void sync()
 {
-	SDL_Delay(20);	/* aprx. 60Hz */
+	SDL_Delay(16);	/* aprx. 60Hz */
 	SDL_Flip(screen);
 }
