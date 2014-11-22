@@ -48,7 +48,8 @@ int main(int argc, const char *argv[])
 	err = read_rom(&c, argv[1]);
 	if (err != 0)
 		return err;
-	mk_window();
+	open_window();
 	run(&c);
+	close_window();
 	return EXIT_SUCCESS;
 }

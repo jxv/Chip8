@@ -1,5 +1,5 @@
 LIB := -lc -lm
-CFLAGS := -Wall -pedantic -Werror -std=c99 -DNDEBUG
+CFLAGS := -Wall -pedantic -Werror -std=c99 -DNDEBUG -D_GNU_SOURCE
 OUT := chip8
 SRC := chip8.c main.c
 RM := rm

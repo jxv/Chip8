@@ -3,13 +3,17 @@
 
 SDL_Surface *screen = NULL;
 
-void mk_window()
+void open_window()
 {
 	SDL_Init(SDL_INIT_VIDEO);
 	screen = SDL_SetVideoMode(64, 32, 8, SDL_SWSURFACE);
 	SDL_WM_SetCaption("chip8", NULL);
 }
 
+void close_window()
+{
+	SDL_Quit();
+}
 
 bool keys(chip8_t *c)
 {

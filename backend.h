@@ -3,7 +3,8 @@
 
 #include "chip8.h"
 
-void mk_window();
+void open_window();
+void close_window();
 bool keys(chip8_t *);
 void draw(const chip8_t *);
 void sync();
